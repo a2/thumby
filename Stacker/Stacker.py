@@ -1,3 +1,6 @@
+# Stacker
+# by a2
+
 import machine
 import math
 import random
@@ -136,7 +139,6 @@ class Game:
     
     def __drawBlock(self, column, row):
         thumby.display.fillRect(29 + 2 * column, thumby.DISPLAY_H - 7 - 2 * row, 2, 2) 
-        
     
     def drawOnce(self):
         thumby.display.fill(0)
