@@ -1,8 +1,6 @@
 # Balloon
 # by a2
 
-# https://tinycircuits.github.io/
-
 import machine
 import math
 import thumby
@@ -47,7 +45,7 @@ def main():
     time.sleep_ms(1) # Why does this fix everything?
     thumby.display.fill(0)
     thumby.display.drawText("Balloon", 8, 0, 1)
-    thumby.display.drawText("Press A/B", 0, 32, 1)
+    thumby.display.drawText("Press A+B", 0, 32, 1)
     thumby.display.update()
 
     # Wait for the user to start
@@ -59,7 +57,7 @@ def main():
     size = 1
     t0 = time.ticks_ms()
     d0 = 5 * 1000
-    waiting = "A"
+    waitingForA = True
     
     # Repeat for 5 seconds
     while time.ticks_diff(time.ticks_ms(), t0) < d0:
@@ -69,16 +67,15 @@ def main():
         drawBalloon(W//2-1, H-5-size, size, 1)
         thumby.display.update()
     
-        if waiting == "A":
+        if waitingForA:
             if thumby.buttonA.pressed() and not thumby.buttonB.pressed():
-                waiting = "B"
-        elif waiting == "B":
-            if thumby.buttonB.pressed() and not thumby.buttonA.pressed():
-                waiting = None
+                waitingForA = False
+                size += 1
         else:
-            size += 1
-            waiting = "A"
-    
+            if thumby.buttonB.pressed() and not thumby.buttonA.pressed():
+                waitingForA = True
+                size += 1
+
     t1 = time.ticks_ms()
     d1 = 7 * 1000
     
@@ -97,7 +94,7 @@ def main():
         thumby.display.drawText(str(size), x, max(H+10+4+dy, H//2-4), 1)
         thumby.display.update()
     
-        dx += math.cos(0.1 * math.pi * float(time.ticks_diff(time.ticks_ms(), t1)))
+        dx += math.cos(math.pi * dy * 4 / 70) / 2
         dy -= 1
         time.sleep_ms(100)
     
