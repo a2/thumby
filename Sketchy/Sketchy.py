@@ -1,6 +1,7 @@
 import time
 import thumby
 import math
+import machine
 from collections import namedtuple
 
 MenuItem = namedtuple("MenuItem", ("title", "action"))
@@ -109,11 +110,15 @@ def clear():
     global clearingScreen, cursorColor, screen
     clearingScreen = 10
     cursorColor = 0
+    
+def quit():
+    machine.soft_reset()
 
 def menuItems():
     return [
         MenuItem("Menu", noop),
         MenuItem("Clear", clear),
+        MenuItem("Quit", quit),
     ]
 
 def draw():
