@@ -12,6 +12,8 @@ H = thumby.DISPLAY_H
 balloonCache = []
 shineCache = []
 
+# BITMAP: width: 10, height: 10
+weirdoBitmap = [120,150,68,191,70,150,71,188,254,16,0,1,3,3,1,1,3,3,0,0]
 
 def drawBalloon(x0, y0, radius, color=1):
     global balloonCache
@@ -98,11 +100,18 @@ def main():
             H + 10 + dy,
             1,
         )
+        thumby.display.blit(
+            weirdoBitmap,
+            W // 2 - 1 + int(dx) - 10,
+            H + 7 - size + dy + size,
+            10,
+            10
+        )
 
         x = int(W / 2) - 4
         if size >= 10:
             x -= 4
-        thumby.display.drawText(str(size), x, max(H + 10 + 4 + dy, H // 2 - 4), 1)
+        thumby.display.drawText(str(size), x, max(H + 20 + dy, H // 2 - 4), 1)
         thumby.display.update()
 
         dx += math.cos(math.pi * dy * 4 / 70) / 2
