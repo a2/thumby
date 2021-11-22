@@ -52,7 +52,7 @@ class Game:
             # Game Over
             for fallingBlock in self.fallingBlocks:
                 fallingBlock.endRow = fallingBlock.row
-            
+
             self.animGameOver = True
 
             for row in range(self.playerLevel, -1, -1):
@@ -60,7 +60,7 @@ class Game:
                     if self.board[row][col]:
                         self.fallingBlocks.append(FallingBlock(col, row, -1))
                         self.board[row][col] = 0
-        
+
         self.playerLevel += 1
         self.animFrame = random.randrange(8)
         self.animDir = random.randrange(-1, 1, 2)
@@ -79,7 +79,7 @@ class Game:
 
     def __updateAnimation(self):
         move = False
-        
+
         self.animTick += 1
         if self.playerLevel < 3:
             move = self.animTick > 7
@@ -91,10 +91,10 @@ class Game:
             move = self.animTick > 4
         else:
             move = self.animTick > 3
-        
+
         if move and self.playerLevel < 15:
             self.animTick = 0
-            
+
             if self.animDir > 0:
                 self.animFrame += 1
                 if self.animFrame >= 8:
@@ -108,7 +108,7 @@ class Game:
             if not self.fallingBlocks:
                 row[self.animFrame:(self.animFrame + self.playerLives)] = [1] * self.playerLives
             self.board[self.playerLevel] = row
-        
+
         if self.fallingBlocks:
             if self.animGameOver and self.fallingBlocks:
                 fallingBlock = self.fallingBlocks[-1]
@@ -136,23 +136,16 @@ class Game:
 
         if not self.fallingBlocks and thumby.actionJustPressed():
             self.__updateAction()
-    
+
     def __drawBlock(self, column, row):
-        thumby.display.fillRect(29 + 2 * column, thumby.DISPLAY_H - 7 - 2 * row, 2, 2) 
-    
+        thumby.display.fillRect(56 - 3 * row, 10 + 3 * column, 2, 2)
+
     def drawOnce(self):
         thumby.display.fill(0)
-        
-        # Draws checkerboard background
-        # for x in range(thumby.DISPLAY_W):
-        #     for y in range(thumby.DISPLAY_H):
-        #         if (x ^ y) & 1 == 0:
-        #             thumby.display.setPixel(x, y, 1)
-        
-        thumby.display.fillRect(25, 1, 22, 38, 1)
+        thumby.display.fillRect(12, 8, 48, 24, 1)
 
     def draw(self):
-        thumby.display.fillRect(27, 3, 18, 34, 0)
+        thumby.display.fillRect(13, 9, 46, 22, 0)
 
         for row, array in enumerate(self.board):
             for col, bit in enumerate(array[2:-2]):
@@ -163,7 +156,7 @@ class Game:
             for fallingBlock in self.fallingBlocks:
                 if fallingBlock.row >= 0: # Game over falls have `endRow == -1`
                     # Subtract 2 from column because column includes the 0,1 hidden columns
-                    self.__drawBlock(fallingBlock.column - 2, fallingBlock.row) 
+                    self.__drawBlock(fallingBlock.column - 2, fallingBlock.row)
 
         thumby.display.update()
 
