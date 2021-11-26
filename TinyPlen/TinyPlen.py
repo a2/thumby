@@ -1,65 +1,63 @@
+from collections import namedtuple
 import math
 import thumby
 import time
 
-# BITMAP: width: 23, height: 12
-bitmapLarge = [0,128,128,64,67,45,57,50,50,100,100,72,72,80,80,32,32,64,64,128,128,0,0,3,2,2,2,2,14,10,10,10,10,10,6,6,6,6,6,6,2,2,2,2,3,2]
+Sprite = namedtuple("Sprite", ["data", "angle", "w", "h"])
 
-# BITMAP: width: 12, height: 7
-bitmapSmol = [32,48,43,101,106,106,116,52,40,48,48,32]
+sprites = [
+    Sprite(data=(16, 24, 24, 20, 20, 26, 58, 49, 53, 27, 24, 16), angle=-90.0, w=12, h=6),
+    Sprite(data=(64, 96, 80, 72, 52, 42, 41, 39, 24, 16, 16), angle=-67.5, w=11, h=7),
+    Sprite(data=(64, 176, 76, 83, 41, 38, 20, 12, 8), angle=-45.0, w=9, h=8),
+    Sprite(data=(255, 161, 90, 38, 18, 10, 6, 1, 0, 0, 0, 0, 0, 0), angle=-22.5, w=7, h=9),
+    Sprite(data=(7, 25, 98, 154, 98, 25, 7), angle=0.0, w=7, h=8),
+    Sprite(data=(6, 10, 18, 38, 90, 161, 255, 0, 0, 0, 0, 0, 0, 1), angle=22.5, w=7, h=9),
+    Sprite(data=(8, 12, 20, 38, 41, 83, 76, 176, 64), angle=45.0, w=9, h=8),
+    Sprite(data=(16, 16, 24, 39, 41, 42, 52, 72, 80, 96, 64), angle=67.5, w=11, h=7),
+    Sprite(data=(16, 24, 27, 53, 49, 58, 26, 20, 20, 24, 24, 16), angle=90.0, w=12, h=6)
+]
 
-# BITMAP: width: 12, height: 7
-bitmapSmolFlip = [32,48,48,40,52,116,106,106,101,43,48,32]
-
+# intro animation
 def intro_animation():
-    # intro animation
-    start = time.ticks_ms()
-    spriteW = 12
-    spriteH = 7
-    spriteX = -spriteW
-    spriteY = 0.0
-    textY = -24.0
-    blinkTimer = 0
-    flip = False
+    spriteX = 0.0
+    spriteY = -10.0
+    tStart = time.ticks_ms()
+    titleEnd = 0
 
-    while True:
-        if thumby.buttonA.justPressed():
-            return
-
+    while not thumby.buttonA.justPressed():
         t0 = time.ticks_ms()
 
-        # draw
-        bitmap = bitmapSmolFlip if flip else bitmapSmol
-        thumby.display.fill(0)
+        # update
+        tdiff = time.ticks_diff(t0, tStart) / 1000
         if spriteY < thumby.DISPLAY_H:
-            thumby.display.blit(bitmap, spriteX, int(spriteY), spriteW, spriteH)
-        thumby.display.drawText("tiny plen", 0, int(textY))
-        if blinkTimer > 60:
-            thumby.display.drawText("press A", 8, thumby.DISPLAY_H - 8)
+            angleDesired = 2 * math.sin(tdiff) / math.pi * 180.0
+            sprite = sprites[0]
+            for candidate in sprites[1:]:
+                if abs(candidate.angle - angleDesired) < abs(sprite.angle - angleDesired):
+                    sprite = candidate
+
+            angleSprite = sprite.angle * math.pi / 180.0
+            spriteX += 0.64 * math.sin(angleSprite)
+            spriteY += 0.05 + math.cos(angleSprite)
+
+        # draw
+        thumby.display.fill(0)
+
+        title = "lil plane"
+        titleEnd = max(titleEnd, int((spriteX / 8) + max((spriteY - 20) / 8, 0)))
+
+        if spriteY + sprite.h / 2 < thumby.DISPLAY_H:
+            thumby.display.blit(sprite.data, int(spriteX), int(spriteY + sprite.h / 2), sprite.w, sprite.h)
+        elif int(tdiff) % 2 == 0:
+            thumby.display.drawText("start", 16, 32)
+
+        thumby.display.drawText(title[:titleEnd], 0, 16)
         thumby.display.update()
 
-        # update
-        # move plane down
-        if spriteY < thumby.DISPLAY_H:
-            spriteY += 1/8
-            if flip: # move left
-                spriteX -= 1
-                if spriteX + spriteW < 0: # change direction
-                    flip = False
-            else: # move right
-                spriteX += 1
-                if spriteX > thumby.DISPLAY_W: # change direction
-                    flip = True
-        # move text down
-        if textY < (thumby.DISPLAY_H - 8) // 2:
-            textY += 1/8
-        else:
-            blinkTimer = (blinkTimer + 1) % 120
-
-        # sleep (until 120 fps)
+        # sleep (until 60 fps)
         t1 = time.ticks_ms()
         diff = time.ticks_diff(t0, t1)
-        time.sleep_ms(1000 // 120 - diff)
+        time.sleep_ms(1000 // 60 - diff)
 
 while True:
     intro_animation()
