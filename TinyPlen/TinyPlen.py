@@ -19,45 +19,51 @@ sprites = [
 
 # intro animation
 def intro_animation():
-    spriteX = 0.0
-    spriteY = -10.0
-    tStart = time.ticks_ms()
+    spriteX = 3.0
+    spriteY = -5.0
+    timer = 0
     titleEnd = 0
 
     while not thumby.buttonA.justPressed():
+        timer += 1
         t0 = time.ticks_ms()
 
         # update
-        tdiff = time.ticks_diff(t0, tStart) / 1000
         if spriteY < thumby.DISPLAY_H:
-            angleDesired = 2 * math.sin(tdiff) / math.pi * 180.0
+            angleDesired = 90 * math.sin(timer / (4.0 * math.pi))
             sprite = sprites[0]
             for candidate in sprites[1:]:
                 if abs(candidate.angle - angleDesired) < abs(sprite.angle - angleDesired):
                     sprite = candidate
 
             angleSprite = sprite.angle * math.pi / 180.0
-            spriteX += 0.64 * math.sin(angleSprite)
-            spriteY += 0.05 + math.cos(angleSprite)
+            spriteX += 2 * math.sin(angleSprite)
+            spriteY += 0.1 + 2 * math.cos(angleSprite)
 
         # draw
         thumby.display.fill(0)
 
         title = "lil plane"
         titleEnd = max(titleEnd, int((spriteX / 8) + max((spriteY - 20) / 8, 0)))
+        thumby.display.drawText(title[:titleEnd], 0, 16)
 
         if spriteY + sprite.h / 2 < thumby.DISPLAY_H:
             thumby.display.blit(sprite.data, int(spriteX), int(spriteY + sprite.h / 2), sprite.w, sprite.h)
-        elif int(tdiff) % 2 == 0:
+        elif int(timer / 30) % 2 == 0:
             thumby.display.drawText("start", 16, 32)
 
-        thumby.display.drawText(title[:titleEnd], 0, 16)
         thumby.display.update()
 
-        # sleep (until 60 fps)
+        # sleep (until 30 fps)
         t1 = time.ticks_ms()
         diff = time.ticks_diff(t0, t1)
-        time.sleep_ms(1000 // 60 - diff)
+        time.sleep_ms(1000 // 30 - diff)
+
+
+def game():
+    pass
+
 
 while True:
     intro_animation()
+    game()
