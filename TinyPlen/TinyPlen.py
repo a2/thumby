@@ -33,7 +33,6 @@ def intro_animation():
     spriteX = 7.0
     spriteY = 2.0
     timer = 0
-    titleEnd = 0
 
     while not thumby.buttonA.justPressed():
         timer += 1
@@ -51,7 +50,7 @@ def intro_animation():
         thumby.display.fill(0)
 
         title = "lil plane"
-        titleEnd = max(titleEnd, int((spriteX / 8) + max((spriteY - 20) / 8, 0)))
+        titleEnd = max(0, (timer // 4) - 2)
         thumby.display.drawText(title[:titleEnd], 0, 16)
 
         if spriteY - sprite.h / 2 < thumby.DISPLAY_H:
