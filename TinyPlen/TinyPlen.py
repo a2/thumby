@@ -49,14 +49,14 @@ def intro_animation():
         # draw
         thumby.display.fill(0)
 
-        title = "lil plane"
-        titleEnd = max(0, (timer // 4) - 2)
-        thumby.display.drawText(title[:titleEnd], 0, 16)
-
         if spriteY - sprite.h / 2 < thumby.DISPLAY_H:
             thumby.display.blit(sprite.data, int(spriteX - sprite.w / 2), int(spriteY - sprite.h / 2), sprite.w, sprite.h)
         elif int(timer / 30) % 2 == 0:
             thumby.display.drawText("start", 16, 32)
+
+        title = "lil plane"
+        titleEnd = timer // 5
+        thumby.display.drawText(title[:titleEnd], 0, 16)
 
         thumby.display.update()
 
