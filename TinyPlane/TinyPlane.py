@@ -42,9 +42,9 @@ def intro_animation():
         angleDesired = 90 * math.sin(timer / 12)
         sprite = sprite_for_angle(angleDesired)
         if spriteY - sprite.h / 2 < thumby.DISPLAY_H:
-            angleSprite = sprite.angle * math.pi / 180.0
-            spriteX += 2 * math.sin(angleSprite)
-            spriteY += 0.1 + 2 * math.cos(angleSprite)
+            angleSprite = (90 - sprite.angle) * math.pi / 180.0
+            spriteX += 2 * math.cos(angleSprite)
+            spriteY += 0.1 + 2 * math.sin(angleSprite)
 
         # draw
         thumby.display.fill(0)
@@ -54,7 +54,7 @@ def intro_animation():
         elif int(timer / 30) % 2 == 0:
             thumby.display.drawText("start", 16, 32)
 
-        title = "lil plane"
+        title = "TinyPlane"
         titleEnd = timer // 5
         thumby.display.drawText(title[:titleEnd], 0, 16)
 
