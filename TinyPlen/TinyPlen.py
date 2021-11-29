@@ -82,14 +82,14 @@ def game():
 
         # update sprite
         if thumby.buttonL.pressed():
-            spriteA = max(-90, spriteA - 22.5)
+            spriteA = max(-90, spriteA - 45 / 4)
         if thumby.buttonR.pressed():
-            spriteA = min(90, spriteA + 22.5)
+            spriteA = min(90, spriteA + 45 / 4)
 
         sprite = sprite_for_angle(spriteA)
         angle = (90 - sprite.angle) * math.pi / 180.0
         spriteX += math.cos(angle)
-        dy = 0.1 + math.sin(angle)
+        dy = 0.1 + 2 * math.sin(angle)
         spriteY += dy
         if spriteY >= int(20 - sprite.h / 2 + 0.5):
             cameraY += dy
@@ -114,7 +114,7 @@ def game():
         # add new blocks
         if spriteY > blockMaxY:
             y = blockMaxY + 30
-            padding = 10
+            padding = 5
             gap = 30
             w = random.randint(padding, thumby.DISPLAY_W - padding - gap)
             blockL = Block(x=0, y=y, w=w, h=10)
