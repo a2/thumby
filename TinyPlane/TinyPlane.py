@@ -71,11 +71,7 @@ def game():
     spriteX = 0.0
     spriteY = 2.0
     spriteA = 90.0
-
-    blocks = [
-        Block(x=0, y=20, w=20, h=10),
-        Block(x=thumby.DISPLAY_W - 20, y=20, w=20, h=10),
-    ]
+    blocks = []
 
     while True:
         t0 = time.ticks_ms()
@@ -94,33 +90,52 @@ def game():
         if spriteY >= int(20 - sprite.h / 2 + 0.5):
             cameraY += dy
 
-        if spriteX < 0 or spriteX > thumby.DISPLAY_W:
-            # game over
-            return
+        if spriteX <= 0:
+            spriteX = 0
+            spriteA = 0
+        elif spriteX >= thumby.DISPLAY_W:
+            spriteX = thumby.DISPLAY_W
+            spriteA = 0
 
         # update blocks
-        blockMaxY = 0
+        blockH = 3
+        if len(blocks) == 0:
+            block = Block(x=0, y=20, w=thumby.DISPLAY_W // 2, h=blockH)
+            blocks.append(block)
+
+        lastBlock = None
         for i, block in enumerate(blocks):
-            blockMaxY = max(blockMaxY, block.y + block.h)
-            if block.y + block.h < cameraY:
+            maxY = block.y + block.h
+
+            if maxY < cameraY:
                 del blocks[i]
             else:
-                withinX = spriteX > block.x and spriteX < block.x + block.w
-                withinY = spriteY > block.y and spriteY < block.y + block.h
+                if lastBlock is None or block.y + block.h > lastBlock.y + lastBlock.h:
+                    lastBlock = block
+
+                withinX = spriteX >= block.x and spriteX <= block.x + block.w
+                withinY = spriteY >= block.y and spriteY <= block.y + block.h
                 if withinX and withinY:
                     # game over
                     return
 
         # add new blocks
-        if spriteY > blockMaxY:
-            y = blockMaxY + 30
-            padding = 5
-            gap = 30
-            w = random.randint(padding, thumby.DISPLAY_W - padding - gap)
-            blockL = Block(x=0, y=y, w=w, h=10)
-            blockR = Block(x=w + gap, y=y, w=thumby.DISPLAY_W - (w + gap), h=10)
-            blocks.append(blockL)
-            blocks.append(blockR)
+        blockMinW = 20
+        blockMaxW = thumby.DISPLAY_W - 20
+        while lastBlock.y + lastBlock.h < cameraY + thumby.DISPLAY_H:
+            variation = random.randint(-10, 10)
+
+            x = 0
+            y = lastBlock.y + lastBlock.h + 20
+            w = min(blockMaxW, max(blockMinW, lastBlock.x + variation))
+
+            if lastBlock.x == 0:
+                w = min(blockMaxW, max(blockMinW, thumby.DISPLAY_W - lastBlock.w + variation))
+                x = thumby.DISPLAY_W - w
+
+            block = Block(x=x, y=y, w=w, h=blockH)
+            blocks.append(block)
+            lastBlock = block
 
         # draw
         thumby.display.fill(0)
