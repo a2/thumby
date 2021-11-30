@@ -7,7 +7,7 @@ import time
 Sprite = namedtuple("Sprite", ["data", "angle", "w", "h"])
 Block = namedtuple("Block", ["x", "y", "w", "h"])
 
-sprites = [
+sprites = (
     Sprite(data=(16, 24, 24, 20, 20, 26, 58, 49, 53, 27, 24, 16), angle=-90.0, w=12, h=6),
     Sprite(data=(64, 96, 80, 72, 52, 42, 41, 39, 24, 16, 16), angle=-67.5, w=11, h=7),
     Sprite(data=(64, 176, 76, 83, 41, 38, 20, 12, 8), angle=-45.0, w=9, h=8),
@@ -16,8 +16,8 @@ sprites = [
     Sprite(data=(6, 10, 18, 38, 90, 161, 255, 0, 0, 0, 0, 0, 0, 1), angle=22.5, w=7, h=9),
     Sprite(data=(8, 12, 20, 38, 41, 83, 76, 176, 64), angle=45.0, w=9, h=8),
     Sprite(data=(16, 16, 24, 39, 41, 42, 52, 72, 80, 96, 64), angle=67.5, w=11, h=7),
-    Sprite(data=(16, 24, 27, 53, 49, 58, 26, 20, 20, 24, 24, 16), angle=90.0, w=12, h=6)
-]
+    Sprite(data=(16, 24, 27, 53, 49, 58, 26, 20, 20, 24, 24, 16), angle=90.0, w=12, h=6),
+)
 
 # returns the sprite whose angle is closest to the argument
 def sprite_for_angle(angle):
@@ -67,11 +67,17 @@ def intro_animation():
 
 
 def game():
+    score = 0
     cameraY = 0.0
     spriteX = 0.0
     spriteY = 2.0
     spriteA = 90.0
-    blocks = []
+
+    blockH = 5
+    blockGap = 20
+    blockMinW = 20
+    blockMaxW = thumby.DISPLAY_W - 20
+    blocks = [Block(x=0, y=20, w=thumby.DISPLAY_W // 2, h=blockH)]
 
     while True:
         t0 = time.ticks_ms()
@@ -98,58 +104,49 @@ def game():
             spriteA = 0
 
         # update blocks
-        blockH = 3
-        if len(blocks) == 0:
-            block = Block(x=0, y=20, w=thumby.DISPLAY_W // 2, h=blockH)
-            blocks.append(block)
-
-        lastBlock = None
-        for i, block in enumerate(blocks):
-            maxY = block.y + block.h
-
-            if maxY < cameraY:
-                del blocks[i]
+        for block in blocks:
+            if block.y + block.h < cameraY:
+                score += 1
+                blocks.remove(block)
             else:
-                if lastBlock is None or block.y + block.h > lastBlock.y + lastBlock.h:
-                    lastBlock = block
-
-                withinX = spriteX >= block.x and spriteX <= block.x + block.w
-                withinY = spriteY >= block.y and spriteY <= block.y + block.h
+                withinX = (spriteX + 2) >= block.x and (spriteX - 2) <= block.x + block.w
+                withinY = (spriteY + 2) >= block.y and (spriteY - 2) <= block.y + block.h
                 if withinX and withinY:
                     # game over
                     return
 
         # add new blocks
-        blockMinW = 20
-        blockMaxW = thumby.DISPLAY_W - 20
+        lastBlock = blocks[-1]
         while lastBlock.y + lastBlock.h < cameraY + thumby.DISPLAY_H:
-            variation = random.randint(-10, 10)
-
+            dx = random.randint(-10, 10)
             x = 0
-            y = lastBlock.y + lastBlock.h + 20
-            w = min(blockMaxW, max(blockMinW, lastBlock.x + variation))
+            y = lastBlock.y + lastBlock.h + blockGap
+            w = min(blockMaxW, max(blockMinW, lastBlock.x + dx))
 
             if lastBlock.x == 0:
-                w = min(blockMaxW, max(blockMinW, thumby.DISPLAY_W - lastBlock.w + variation))
+                w = min(blockMaxW, max(blockMinW, thumby.DISPLAY_W - lastBlock.w + dx))
                 x = thumby.DISPLAY_W - w
 
-            block = Block(x=x, y=y, w=w, h=blockH)
-            blocks.append(block)
-            lastBlock = block
+            lastBlock = Block(x, y, w, blockH)
+            blocks.append(lastBlock)
 
         # draw
         thumby.display.fill(0)
         thumby.display.blit(sprite.data, int(spriteX - sprite.w / 2), int(spriteY - sprite.h / 2 - cameraY), sprite.w, sprite.h)
+
         for block in blocks:
             x, y, w, h = block
+
+            # extend outer edge beyond screen
             if x == 0:
                 x -= 1
                 w += 1
             if x + w == thumby.DISPLAY_W:
-                x -= 1
                 w += 1
+
             thumby.display.rect(x, int(y - cameraY), w, h, 1)
 
+        thumby.display.drawText(str(score), 0, 0)
         thumby.display.update()
 
         # sleep (until 30 fps)
